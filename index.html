@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Верификация</title>
+<style>
+  html,body{margin:0;height:100%;background:#0d0d0f;font-family:system-ui,Arial}
+  #c{height:100vh}
+  #e{color:#bbb;padding:16px;font-size:14px;white-space:pre-wrap}
+</style>
+<script src="https://static.cyberity.ru/idensic/static/sns-websdk-builder.js"></script>
+</head><body>
+<div id="c"></div><div id="e"></div>
+<script>
+  // Токен берётся из адреса после # — на сервер хостинга он не отправляется.
+  var TOKEN = decodeURIComponent((location.hash || "").replace(/^#/, "")).trim();
+  function log(m){ document.getElementById("e").textContent += m + "\n"; }
+  function launch(){
+    try{
+      var sdk = snsWebSdk.init(TOKEN, function(){ return Promise.resolve(TOKEN); })
+        .withConf({ lang: "ru" })
+        .withOptions({ addViewportTag:false, adaptIframeHeight:true })
+        .on("idCheck.onError", function(e){ log("error: " + JSON.stringify(e)); })
+        .build();
+      sdk.launch("#c");
+    }catch(err){ log("init error: " + err); }
+  }
+  if(!TOKEN){
+    log("Нет токена в ссылке. Ссылку нужно открывать из расширения (в ней часть после #).");
+  } else if(window.snsWebSdk){
+    launch();
+  } else {
+    window.addEventListener("load", function(){ window.snsWebSdk ? launch() : log("SDK не загрузился"); });
+  }
+</script>
+</body></html>
